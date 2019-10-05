@@ -13,11 +13,42 @@ class BSTNode {
     BSTNode<Data>* parent;
     Data const data;  // the const Data in this node.
 
-    /** TODO */
-    BSTNode(const Data& d) : data(d) {}
+    /** Initialize BSTNode with data, no children and parent
+     *  Parameter: d - the data to initialize BSTNode
+     */
+    BSTNode(const Data& d) : data(d) {
+        left = nullptr;
+        right = nullptr;
+        parent = nullptr;
+    }
 
-    /** TODO */
-    BSTNode<Data>* successor() { return 0; }
+    /* Return successor of the current node
+     * cases:
+     *    1. Has a right child, go to the most left of right child tree
+     *    2. Doesn't have a right child, go up
+     *      if it's left child of current node, then the successor is the parent
+     *      if it's not the left child, go up until it's left child
+     *        or it's null, return nullptr
+     */
+    BSTNode<Data>* successor() {
+        // The current node
+        BSTNode<Data>* curr = nullptr;
+        // find the successor
+        if (this->right != nullptr) {
+            curr = this->right;
+            while (curr->left != nullptr) curr = curr->left;
+            return curr;
+        } else {
+            curr = this;
+            while (curr->parent != nullptr) {
+                if (curr->parent->left == curr)
+                    return curr->parent;
+                else
+                    curr = curr->parent;
+            }
+            return nullptr;
+        }
+    }
 };
 
 /** DO NOT CHANGE THIS METHOD
