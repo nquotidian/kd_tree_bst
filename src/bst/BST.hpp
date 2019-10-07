@@ -28,9 +28,14 @@ class BST {
     BST() : root(0), isize(0), iheight(-1) {}
 
     /** TODO */
-    virtual ~BST() { deleteAll(root); }
+    virtual ~BST() {
+        deleteAll(root);
+        iheight = -1;
+        isize = 0;
+    }
 
-    /** TODO
+    /* Insert a node in BST
+     * return false if the node already exists
      * recursively or while loop
      * virtual: member function defined on the base class
      */
@@ -68,7 +73,7 @@ class BST {
         return false;
     }
 
-    /** TODO */
+    /** Find a data item in BST */
     virtual iterator find(const Data& item) const {
         BSTNode<Data>* curr = root;
         while ((item < curr->data) || (curr->data < item)) {
@@ -84,16 +89,21 @@ class BST {
         }
     }
 
-    /** TODO */
+    /** Return the size of BST */
     unsigned int size() const { return isize; }
 
-    /** TODO */
+    /** Return the size of BST, return if it's empty */
     int height() const { return iheight; }
 
-    /** TODO */
-    bool empty() const { return false; }
+    /** Return true if BST is empty */
+    bool empty() const {
+        if (root == nullptr)
+            return true;
+        else
+            return false;
+    }
 
-    /** TODO */
+    /** Return the first node of BST */
     iterator begin() const { return BST::iterator(first(root)); }
 
     /** Return an iterator pointing past the last item in the BST.
@@ -103,13 +113,23 @@ class BST {
     /** TODO
      * for debugging
      */
-    vector<Data> inorder() const {}
+    vector<Data> inorder() const {
+        BSTNode<Data>* trav = first(root);
+        vector<Data> v(isize);
+        v.push_back(trav->data);
+    }
 
   private:
-    /** TODO */
-    static BSTNode<Data>* first(BSTNode<Data>* root) { return 0; }
+    /* Find the first item of BST */
+    static BSTNode<Data>* first(BSTNode<Data>* root) {
+        BSTNode<Data>* curr = root;
+        while (curr->left != nullptr) {
+            curr = curr->left;
+        }
+        return curr;
+    }
 
-    /** TODO */
+    /* Helper method for ~BST() */
     static void deleteAll(BSTNode<Data>* n) {
         /* Pseudocode:
            if current node is null: return;
@@ -117,6 +137,13 @@ class BST {
            recursively delete right sub-tree
            delete current node
         */
+        if (n == nullptr) {
+            return;
+        } else {
+            deleteAll(n->left);
+            deleteAll(n->right);
+            delete n;
+        }
     }
 };
 
