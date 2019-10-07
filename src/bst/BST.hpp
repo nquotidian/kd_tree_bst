@@ -30,17 +30,65 @@ class BST {
     /** TODO */
     virtual ~BST() { deleteAll(root); }
 
-    /** TODO */
-    virtual bool insert(const Data& item) { return false; }
+    /** TODO
+     * recursively or while loop
+     * virtual: member function defined on the base class
+     */
+    virtual bool insert(const Data& item) {
+        BSTNode<Data> i_node(item);
+        // If the tree is empty
+        if (root == nullptr) {
+            root = &i_node;
+            isize++;
+            iheight++;
+            return true;
+        }
+        BSTNode<Data>* curr = root;
+        while ((item < curr->data) || (curr->data < item)) {
+            if (item < curr->data) {
+                if (curr->left == nullptr) {
+                    curr->left = &i_node;
+                    iheight++;
+                    isize++;
+                    return true;
+                } else {
+                    curr = curr->left;
+                }
+            } else if (curr->data < item) {
+                if (curr->right == nullptr) {
+                    curr->right = &i_node;
+                    iheight++;
+                    isize++;
+                    return true;
+                } else {
+                    curr = curr->right;
+                }
+            }
+        }
+        return false;
+    }
 
     /** TODO */
-    virtual iterator find(const Data& item) const { return 0; }
+    virtual iterator find(const Data& item) const {
+        BSTNode<Data>* curr = root;
+        while ((item < curr->data) || (curr->data < item)) {
+            if (item < curr->data) {
+                curr = curr->left;
+            } else if (curr->data < item) {
+                curr = curr->right;
+            } else if (curr == nullptr) {
+                return nullptr;
+            } else {
+                return curr;
+            }
+        }
+    }
 
     /** TODO */
-    unsigned int size() const { return 0; }
+    unsigned int size() const { return isize; }
 
     /** TODO */
-    int height() const { return 0; }
+    int height() const { return iheight; }
 
     /** TODO */
     bool empty() const { return false; }
@@ -52,7 +100,9 @@ class BST {
      */
     iterator end() const { return typename BST<Data>::iterator(0); }
 
-    /** TODO */
+    /** TODO
+     * for debugging
+     */
     vector<Data> inorder() const {}
 
   private:
@@ -71,3 +121,5 @@ class BST {
 };
 
 #endif  // BST_HPP
+
+// run the time command ./build/....
