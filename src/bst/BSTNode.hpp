@@ -22,8 +22,8 @@ class BSTNode {
         parent = nullptr;
     }
 
-    /* Return successor of the current node
-     * cases:
+    /** Return successor of the current node
+     *  cases:
      *    1. Has a right child, go to the most left of right child tree
      *    2. Doesn't have a right child, go up
      *      if it's left child of current node, then the successor is the parent

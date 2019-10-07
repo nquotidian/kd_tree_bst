@@ -27,33 +27,33 @@ class BST {
      */
     BST() : root(0), isize(0), iheight(-1) {}
 
-    /** TODO */
+    /** Destructor */
     virtual ~BST() {
         deleteAll(root);
         iheight = -1;
         isize = 0;
     }
 
-    /* Insert a node in BST
-     * return false if the node already exists
-     * recursively or while loop
-     * virtual: member function defined on the base class
+    /** Insert a node in BST
+     *  return false if the node already exists
+     *  recursively or while loop
+     *  virtual: member function defined on the base class
      */
     virtual bool insert(const Data& item) {
-        BSTNode<Data> i_node(item);
+        BSTNode<Data>* node = new BSTNode<Data>(item);
         // If the tree is empty
         if (root == nullptr) {
-            root = &i_node;
-            isize++;
+            root = node;
             iheight++;
+            isize++;
             return true;
         }
         BSTNode<Data>* curr = root;
         while ((item < curr->data) || (curr->data < item)) {
             if (item < curr->data) {
                 if (curr->left == nullptr) {
-                    curr->left = &i_node;
-                    iheight++;
+                    curr->left = node;
+                    iheight = height();
                     isize++;
                     return true;
                 } else {
@@ -61,8 +61,8 @@ class BST {
                 }
             } else if (curr->data < item) {
                 if (curr->right == nullptr) {
-                    curr->right = &i_node;
-                    iheight++;
+                    curr->right = node;
+                    iheight = height();
                     isize++;
                     return true;
                 } else {
@@ -70,6 +70,7 @@ class BST {
                 }
             }
         }
+        free(node);
         return false;
     }
 
@@ -92,8 +93,8 @@ class BST {
     /** Return the size of BST */
     unsigned int size() const { return isize; }
 
-    /** Return the size of BST, return if it's empty */
-    int height() const { return iheight; }
+    /** Return the size of BST */
+    int height() const { return height_helper(root); }
 
     /** Return true if BST is empty */
     bool empty() const {
@@ -114,13 +115,13 @@ class BST {
      * for debugging
      */
     vector<Data> inorder() const {
-        BSTNode<Data>* trav = first(root);
-        vector<Data> v(isize);
-        v.push_back(trav->data);
+        vector<Data> vec(isize);
+        inorder_helper(root, vec);
+        return vec;
     }
 
   private:
-    /* Find the first item of BST */
+    /** Find the first item of BST */
     static BSTNode<Data>* first(BSTNode<Data>* root) {
         BSTNode<Data>* curr = root;
         while (curr->left != nullptr) {
@@ -129,7 +130,7 @@ class BST {
         return curr;
     }
 
-    /* Helper method for ~BST() */
+    /** Helper method for ~BST() */
     static void deleteAll(BSTNode<Data>* n) {
         /* Pseudocode:
            if current node is null: return;
@@ -144,6 +145,27 @@ class BST {
             deleteAll(n->right);
             delete n;
         }
+    }
+
+    /** Helper method for inorder() */
+    static void inorder_helper(BSTNode<Data>* n, vector<Data>& vec) {
+        if (n == nullptr) {
+            return;
+        }
+        inorder_helper(n->left, vec);
+        vec.push_back(n->data);
+        inorder_helper(n->right, vec);
+    }
+
+    /** Helper method for height() */
+    static int height_helper(BSTNode<Data>* n) {
+        if (n == nullptr) return -1;
+        int left_height = height_helper(n->left);
+        int right_height = height_helper(n->right);
+        if (left_height > right_height)
+            return left_height + 1;
+        else
+            return right_height + 1;
     }
 };
 

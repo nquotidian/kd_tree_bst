@@ -32,9 +32,9 @@ class BSTIterator : public iterator<input_iterator_tag, Data> {
         return before;
     }
 
-    /* Compare two iterators
-     * true: if two iterators both hold a pointer to the same BSTNode
-     * false: not the same pointer
+    /** Compare two iterators
+     *  true: if two iterators both hold a pointer to the same BSTNode
+     *  false: not the same pointer
      */
     bool operator==(BSTIterator<Data> const& other) const {
         if (this->curr == other.curr)
@@ -43,7 +43,7 @@ class BSTIterator : public iterator<input_iterator_tag, Data> {
             return false;
     }
 
-    /* Compare two iterators */
+    /** Compare two iterators */
     bool operator!=(BSTIterator<Data> const& other) const {
         if (this->curr != other.curr)
             return true;
