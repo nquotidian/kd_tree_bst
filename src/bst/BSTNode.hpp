@@ -41,9 +41,9 @@ class BSTNode {
         } else {
             curr = this;
             while (curr->parent != nullptr) {
-                if (curr->parent->left == curr)
+                if (curr == (curr->parent)->left) {
                     return curr->parent;
-                else
+                } else
                     curr = curr->parent;
             }
             return nullptr;
