@@ -83,11 +83,10 @@ class BST {
             } else if (curr->data < item) {
                 curr = curr->right;
             } else if (curr == nullptr) {
-                return nullptr;
-            } else {
-                return curr;
+                return BST<Data>::iterator(nullptr);
             }
         }
+        return BST<Data>::iterator(curr);
     }
 
     /** Return the size of BST */
@@ -115,7 +114,7 @@ class BST {
      * for debugging
      */
     vector<Data> inorder() const {
-        vector<Data> vec(isize);
+        vector<Data> vec(0);
         inorder_helper(root, vec);
         return vec;
     }
