@@ -53,6 +53,7 @@ class BST {
             if (item < curr->data) {
                 if (curr->left == nullptr) {
                     curr->left = node;
+                    (curr->left)->parent = curr;
                     iheight = height();
                     isize++;
                     return true;
@@ -62,6 +63,7 @@ class BST {
             } else if (curr->data < item) {
                 if (curr->right == nullptr) {
                     curr->right = node;
+                    (curr->right)->parent = curr;
                     iheight = height();
                     isize++;
                     return true;
@@ -77,13 +79,12 @@ class BST {
     /** Find a data item in BST */
     virtual iterator find(const Data& item) const {
         BSTNode<Data>* curr = root;
-        while ((item < curr->data) || (curr->data < item)) {
+        while (((item < curr->data) || (curr->data < item)) &&
+               (curr != nullptr)) {
             if (item < curr->data) {
                 curr = curr->left;
             } else if (curr->data < item) {
                 curr = curr->right;
-            } else if (curr == nullptr) {
-                return BST<Data>::iterator(nullptr);
             }
         }
         return BST<Data>::iterator(curr);
