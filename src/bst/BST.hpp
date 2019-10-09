@@ -127,6 +127,8 @@ class BST {
   private:
     /** Find the first item of BST */
     static BSTNode<Data>* first(BSTNode<Data>* root) {
+        // root is nullptr
+        if (!root) return nullptr;
         BSTNode<Data>* curr = root;
         while (curr->left != nullptr) {
             curr = curr->left;
@@ -142,9 +144,7 @@ class BST {
            recursively delete right sub-tree
            delete current node
         */
-        if (n == nullptr) {
-            return;
-        } else {
+        if (n) {
             deleteAll(n->left);
             deleteAll(n->right);
             delete n;
