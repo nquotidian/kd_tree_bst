@@ -41,6 +41,9 @@ class BST {
      */
     virtual bool insert(const Data& item) {
         BSTNode<Data>* node = new BSTNode<Data>(item);
+        if (node == nullptr) {
+            return false;
+        }
         // If the tree is empty
         if (root == nullptr) {
             root = node;
@@ -79,8 +82,9 @@ class BST {
     /** Find a data item in BST */
     virtual iterator find(const Data& item) const {
         BSTNode<Data>* curr = root;
-        while (((item < curr->data) || (curr->data < item)) &&
-               (curr != nullptr)) {
+        // avoid segfault by change the sequence of boolean expression
+        while ((curr != nullptr) &&
+               ((item < curr->data) || (curr->data < item))) {
             if (item < curr->data) {
                 curr = curr->left;
             } else if (curr->data < item) {
