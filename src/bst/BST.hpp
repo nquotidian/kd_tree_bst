@@ -115,7 +115,7 @@ class BST {
      */
     iterator end() const { return typename BST<Data>::iterator(0); }
 
-    /** TODO
+    /** Inorder traversal tree to an vector
      * for debugging
      */
     vector<Data> inorder() const {
