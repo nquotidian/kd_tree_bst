@@ -75,7 +75,7 @@ class BST {
                 }
             }
         }
-        free(node);
+        delete node;
         return false;
     }
 
