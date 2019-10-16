@@ -9,6 +9,8 @@
 
 using namespace std;
 
+const double SQ = 2;
+
 class KDT {
   private:
     /** Inner class which defines a KD tree node */
@@ -71,8 +73,20 @@ class KDT {
         root = buildSubtree(points, 0, points.size() - 1, 0, iheight);
     }
 
-    /** TODO */
-    Point* findNearestNeighbor(Point& queryPoint) { return nullptr; }
+    /** TODO
+     *  Return nullptr if the KD tree is empty
+     *  Find the nearest neighbor. Recursively
+     *  From the root, look up for the queryPoint first, to the leaf node
+     *  Traverse down, use recursion
+     *  Update the thredhold,
+     */
+    Point* findNearestNeighbor(Point& queryPoint) {
+        // Return nullptr if the tree is empty
+        if (!root) return nullptr;
+        KDNode* nn = nullptr;
+        findNNHelper(root, nn, queryPoint, 0);
+        return &(nn->point);
+    }
 
     /** Extra credit */
     vector<Point> rangeSearch(vector<pair<double, double>>& queryRegion) {
@@ -136,13 +150,72 @@ class KDT {
         }
     }
 
-    /** TODO */
-    void findNNHelper(KDNode* node, Point& queryPoint, unsigned int curDim) {}
+    /** Find the nearest node by updating the threshold */
+    void findNNHelper(KDNode* node, KDNode* nn, Point& queryPoint,
+                      unsigned int curDim) {
+        double dist = 0;
+        // Leaf node
+        if (node->left == nullptr && node->right == nullptr) {
+            cout << "```to leaf node```" << endl;
+            // update distance to query point
+            dist = sq_ecli_dis(node->point.features, queryPoint.features);
+            if (dist < threshold) {
+                threshold = dist;
+                node->point.distToQuery = threshold;
+                nn = node;
+            }
+        } else {
+            if (queryPoint.features[curDim] < node->point.features[curDim]) {
+                // Go left
+                findNNHelper(node->left, nn, queryPoint, (curDim + 1) % numDim);
+                // Calculate distance for current dimension
+                double dist_dim_r = pow((node->point.features[curDim] -
+                                         queryPoint.features[curDim]),
+                                        SQ);
+                // If searching the right subtree is necessary
+                if (dist_dim_r < threshold) {
+                    // Update threshold
+                    dist =
+                        sq_ecli_dis(node->point.features, queryPoint.features);
+                    if (dist < threshold) {
+                        threshold = dist;
+                        node->point.distToQuery = threshold;
+                        nn = node;
+                    }
+                    findNNHelper(node->right, nn, queryPoint,
+                                 (curDim + 1) % numDim);
+                }
+            } else {
+                // Go right
+                findNNHelper(node->right, nn, queryPoint,
+                             (curDim + 1) % numDim);
+                // Calculate distance for current dimension
+                double dist_dim_l = pow((node->point.features[curDim] -
+                                         queryPoint.features[curDim]),
+                                        SQ);
+                // if serarching the left subtree is necessary
+                if (dist_dim_l < threshold) {
+                    // Update threshold if necessary
+                    dist =
+                        sq_ecli_dis(node->point.features, queryPoint.features);
+                    if (dist < threshold) {
+                        threshold = dist;
+                        node->point.distToQuery = threshold;
+                        nn = node;
+                    }
+                    findNNHelper(node->left, nn, queryPoint,
+                                 (curDim + 1) % numDim);
+                }
+            }
+        }
+    }
 
     /** Extra credit */
     void rangeSearchHelper(KDNode* node, vector<pair<double, double>>& curBB,
                            vector<pair<double, double>>& queryRegion,
-                           unsigned int curDim) {}
+                           unsigned int curDim) {
+        return;
+    }
 
     /** Helper method of destructor, recursively delete the tree */
     static void deleteAll(KDNode* n) {
@@ -150,6 +223,13 @@ class KDT {
             deleteAll(n->left);
             deleteAll(n->right);
         }
+    }
+
+    double sq_ecli_dis(vector<double> v1, vector<double> v2) {
+        double dist = 0;
+        for (unsigned int i = 0; i < numDim; i++)
+            dist += pow((v1[i] - v2[i]), SQ);
+        return dist;
     }
 
     // Add your own helper methods here
