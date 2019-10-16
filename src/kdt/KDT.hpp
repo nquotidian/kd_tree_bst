@@ -70,7 +70,15 @@ class KDT {
     void build(vector<Point>& points) {
         if (points.empty()) return;
         // initial call when building a kd tree
-        root = buildSubtree(points, 0, points.size() - 1, 0, iheight);
+        numDim = points.begin()->numDim;
+        // Builds subtree using the points
+        // Adds a point to vector for sorting [first, end), in case of segfault
+        // points.emplace_back(points[0]);
+        // points.emplace_back(points[0]);
+        root = buildSubtree(points, 0, points.size() - 1, 0, -1);
+        iheight = log2(points.size());
+        cout << "`````after log``````" << iheight << endl;
+        cout << "``````size after built`````" << isize << endl;
     }
 
     /** TODO
@@ -83,9 +91,9 @@ class KDT {
     Point* findNearestNeighbor(Point& queryPoint) {
         // Return nullptr if the tree is empty
         if (!root) return nullptr;
-        KDNode* nn = nullptr;
-        findNNHelper(root, nn, queryPoint, 0);
-        return &(nn->point);
+        findNNHelper(root, queryPoint, 0);
+        Point* nn = &nearestNeighbor;
+        return nn;
     }
 
     /** Extra credit */
@@ -126,24 +134,26 @@ class KDT {
      */
     KDNode* buildSubtree(vector<Point>& points, unsigned int start,
                          unsigned int end, unsigned int curDim, int height) {
-        int medi = 0;
-        numDim = points.begin()->numDim;
-
         if (start <= end) {
             // Sorts the elements between [points.begin() + start,
             // points.begin() + end + 1) according to it's dimension
             sort(points.begin() + start, points.begin() + end + 1,
                  CompareValueAt(curDim));
             // calculate the parent node of subtree
-            medi = floor((start + end) / 2);
-            // node = new KDNode(points[medi]);
+            int medi = floor((start + end) / 2);
+            // New node
             KDNode* node = new KDNode(points[medi]);
             isize++;
+            // Check if medi-1 >= 0, in case the convert from int to unsigned
+            // causes segfault
+            if (medi - 1 >= 0) {
+                node->left = buildSubtree(points, start, medi - 1,
+                                          (curDim + 1) % numDim, height + 1);
+            } else {
+                node->left = nullptr;
+            }
             node->right = buildSubtree(points, medi + 1, end,
                                        (curDim + 1) % numDim, height + 1);
-            node->left = buildSubtree(points, start, medi - 1,
-                                      (curDim + 1) % numDim, height + 1);
-            iheight++;
             return node;
         } else {
             return nullptr;
@@ -151,23 +161,21 @@ class KDT {
     }
 
     /** Find the nearest node by updating the threshold */
-    void findNNHelper(KDNode* node, KDNode* nn, Point& queryPoint,
-                      unsigned int curDim) {
+    void findNNHelper(KDNode* node, Point& queryPoint, unsigned int curDim) {
         double dist = 0;
         // Leaf node
         if (node->left == nullptr && node->right == nullptr) {
-            cout << "```to leaf node```" << endl;
             // update distance to query point
             dist = sq_ecli_dis(node->point.features, queryPoint.features);
             if (dist < threshold) {
                 threshold = dist;
                 node->point.distToQuery = threshold;
-                nn = node;
+                nearestNeighbor = node->point;
             }
         } else {
             if (queryPoint.features[curDim] < node->point.features[curDim]) {
                 // Go left
-                findNNHelper(node->left, nn, queryPoint, (curDim + 1) % numDim);
+                findNNHelper(node->left, queryPoint, (curDim + 1) % numDim);
                 // Calculate distance for current dimension
                 double dist_dim_r = pow((node->point.features[curDim] -
                                          queryPoint.features[curDim]),
@@ -179,16 +187,14 @@ class KDT {
                         sq_ecli_dis(node->point.features, queryPoint.features);
                     if (dist < threshold) {
                         threshold = dist;
-                        node->point.distToQuery = threshold;
-                        nn = node;
+                        nearestNeighbor = node->point;
                     }
-                    findNNHelper(node->right, nn, queryPoint,
+                    findNNHelper(node->right, queryPoint,
                                  (curDim + 1) % numDim);
                 }
             } else {
                 // Go right
-                findNNHelper(node->right, nn, queryPoint,
-                             (curDim + 1) % numDim);
+                findNNHelper(node->right, queryPoint, (curDim + 1) % numDim);
                 // Calculate distance for current dimension
                 double dist_dim_l = pow((node->point.features[curDim] -
                                          queryPoint.features[curDim]),
@@ -201,10 +207,9 @@ class KDT {
                     if (dist < threshold) {
                         threshold = dist;
                         node->point.distToQuery = threshold;
-                        nn = node;
+                        nearestNeighbor = node->point;
                     }
-                    findNNHelper(node->left, nn, queryPoint,
-                                 (curDim + 1) % numDim);
+                    findNNHelper(node->left, queryPoint, (curDim + 1) % numDim);
                 }
             }
         }
