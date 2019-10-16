@@ -31,6 +31,14 @@ class SmallKDTFixture : public ::testing::Test {
         vec.emplace_back(Point({5.7, 3.2}));
         vec.emplace_back(Point({1.8, 1.9}));
         vec.emplace_back(Point({4.4, 2.2}));
+
+        // vec.emplace_back(Point({1.0, 3.2}));
+        // vec.emplace_back(Point({3.2, 1.0}));
+        // vec.emplace_back(Point({5.7, 3.2}));
+        // vec.emplace_back(Point({1.8, 2.9}));
+        // vec.emplace_back(Point({4.4, 4.2}));
+        // vec.emplace_back(Point({0.0, 0.0}));
+        // vec.emplace_back(Point({2.7, 9.1}));
         kdt.build(vec);
     }
 };
@@ -38,6 +46,11 @@ class SmallKDTFixture : public ::testing::Test {
 TEST_F(SmallKDTFixture, TEST_SIZE) {
     // Assert that the kd tree has the correct size
     ASSERT_EQ(kdt.size(), 5);
+}
+
+TEST_F(SmallKDTFixture, TEST_HEIGHT) {
+    // Assert that the kd tree has the correct size
+    EXPECT_EQ(kdt.height(), 2);
 }
 
 TEST_F(SmallKDTFixture, TEST_NEAREST_POINT) {
