@@ -86,7 +86,9 @@ class KDT {
     Point* findNearestNeighbor(Point& queryPoint) {
         // Return nullptr if the tree is empty
         if (!root) return nullptr;
+        numDim = queryPoint.numDim;
         findNNHelper(root, queryPoint, 0);
+        threshold = numeric_limits<double>::max();
         return &nearestNeighbor;
     }
 
@@ -100,6 +102,13 @@ class KDT {
 
     /** Return the height of the KD tree */
     int height() const { return iheight; }
+
+    /** In order traverse the KD tree */
+    vector<Point> inorder() {
+        vector<Point> vec(0);
+        inorder_helper(root, vec);
+        return vec;
+    }
 
   private:
     /** TODO
@@ -141,53 +150,35 @@ class KDT {
 
     /** Find the nearest node by updating the threshold */
     void findNNHelper(KDNode* node, Point& queryPoint, unsigned int curDim) {
-        double dist = 0;
         // Leaf node
         if (node->left == nullptr && node->right == nullptr) {
-            // update distance to query point
-            dist = sq_ecli_dis(node->point.features, queryPoint.features);
-            if (dist < threshold) {
-                threshold = dist;
-                node->point.distToQuery = threshold;
-                nearestNeighbor = node->point;
-            }
-        } else if (node->left &&
+            // Update the threshold if it's smaller
+            update_threshold(node, queryPoint);
+        } else if (node->left != nullptr &&
                    queryPoint.features[curDim] < node->point.features[curDim]) {
             // Go left
             findNNHelper(node->left, queryPoint, (curDim + 1) % numDim);
-            // Calculate distance for current dimension
-            double dist_dim_r = pow(
-                (node->point.features[curDim] - queryPoint.features[curDim]),
-                SQ);
-            // If searching the right subtree is necessary
-            if (dist_dim_r < threshold) {
-                // Update threshold
-                dist = sq_ecli_dis(node->point.features, queryPoint.features);
-                if (dist < threshold) {
-                    threshold = dist;
-                    nearestNeighbor = node->point;
-                }
+            // Distance for current dimension
+            double dist_dim_r = curr_dim_dis(node, queryPoint, curDim);
+            // Go right
+            if (node->right != nullptr && dist_dim_r <= threshold) {
+                // Go to the right subtree
                 findNNHelper(node->right, queryPoint, (curDim + 1) % numDim);
             }
-        } else if (node->right && queryPoint.features[curDim] >=
-                                      node->point.features[curDim]) {
+            // If the node has a smaller threshold, update
+            update_threshold(node, queryPoint);
+        } else if (node->right != nullptr) {
             // Go right
             findNNHelper(node->right, queryPoint, (curDim + 1) % numDim);
-            // Calculate distance for current dimension
-            double dist_dim_l = pow(
-                (node->point.features[curDim] - queryPoint.features[curDim]),
-                SQ);
-            // if serarching the left subtree is necessary
-            if (dist_dim_l < threshold) {
-                // Update threshold if necessary
-                dist = sq_ecli_dis(node->point.features, queryPoint.features);
-                if (dist < threshold) {
-                    threshold = dist;
-                    node->point.distToQuery = threshold;
-                    nearestNeighbor = node->point;
-                }
+            // Distance for current dimension
+            double dist_dim_l = curr_dim_dis(node, queryPoint, curDim);
+            // Go left
+            if (node->left != nullptr && dist_dim_l <= threshold) {
+                // Go to the left subtree
                 findNNHelper(node->left, queryPoint, (curDim + 1) % numDim);
             }
+            //  If the node has a better smaller threshold, update
+            update_threshold(node, queryPoint);
         }
     }
 
@@ -206,13 +197,34 @@ class KDT {
         }
     }
 
-    double sq_ecli_dis(vector<double> v1, vector<double> v2) {
-        double dist = 0;
-        for (unsigned int i = 0; i < numDim; i++)
-            dist += pow((v1[i] - v2[i]), SQ);
-        return dist;
+    // Add your own helper methods here
+    /** Calculate the square euclidean distance of two points */
+    double curr_dim_dis(KDNode* n, Point& p, int dim) {
+        return pow(fabs(n->point.features[dim] - p.features[dim]), SQ);
     }
 
-    // Add your own helper methods here
+    /** Update the threshold */
+    void update_threshold(KDNode* node, Point& queryPoint) {
+        double dist = 0;
+        vector<double> v1 = node->point.features;
+        vector<double> v2 = queryPoint.features;
+        for (unsigned int i = 0; i < numDim; i++)
+            dist += pow(fabs(v1[i] - v2[i]), SQ);
+        if (dist < threshold) {
+            threshold = dist;
+            node->point.distToQuery = dist;
+            nearestNeighbor = node->point;
+        }
+    }
+
+    /** Helper function for in order traverse*/
+    static void inorder_helper(KDNode* n, vector<Point>& vec) {
+        if (n == nullptr) {
+            return;
+        }
+        inorder_helper(n->left, vec);
+        vec.push_back(n->point);
+        inorder_helper(n->right, vec);
+    }
 };
 #endif  // KDT_HPP
