@@ -194,6 +194,7 @@ class KDT {
         if (n) {
             deleteAll(n->left);
             deleteAll(n->right);
+            delete n;
         }
     }
 
